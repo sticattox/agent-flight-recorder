@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sticattox/agent-flight-recorder/schemas/trace.schema.json",
+  "title": "Agent Flight Record",
+  "type": "object",
+  "required": ["schema_version", "session", "goal"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "session": {
+      "type": "object",
+      "properties": {
+        "agent": { "type": "string" },
+        "model": { "type": "string" },
+        "date": { "type": "string" },
+        "project": { "type": "string" },
+        "source_path": { "type": "string" }
+      }
+    },
+    "goal": { "type": "string" },
+    "observable_process": { "type": "array" },
+    "decision_points": { "type": "array" },
+    "failures_recoveries": { "type": "array" },
+    "anti_patterns_avoided": { "type": "array" },
+    "patterns_extracted": { "type": "array" },
+    "confidence": { "type": "object" },
+    "provenance_notes": { "type": "string" }
+  }
+}
