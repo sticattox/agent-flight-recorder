@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from .extract import build_trace
+from .hydrate import trace_from_dict
 from .library import empty_library, load_library, merge_trace, save_library
 from .models import FlightTrace, PatternLibrary
 from .parse import load_raw, maybe_json, parse_turns
@@ -13,7 +14,7 @@ def ingest_transcript(path: str | Path) -> FlightTrace:
     raw = load_raw(path)
     as_json = maybe_json(raw)
     if as_json and ("observable_process" in as_json or "schema_version" in as_json):
-        return FlightTrace.from_dict(as_json)
+        return trace_from_dict(as_json)
     turns = parse_turns(raw)
     return build_trace(turns, raw, source_path=str(path))
 
