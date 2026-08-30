@@ -202,12 +202,13 @@ def confidence_for(trace: FlightTrace) -> dict[str, object]:
         + len(trace.anti_patterns_avoided)
         + len(trace.patterns_extracted)
     )
+    goal_known = bool(trace.goal) and trace.goal != "Unstated in transcript"
     if total == 0:
         strength = "low"
-    elif cited >= 4 and trace.goal != "Unstated in transcript":
-        strength = "medium"
     elif cited >= 8:
         strength = "high"
+    elif cited >= 4 and goal_known:
+        strength = "medium"
     else:
         strength = "low"
     return {
