@@ -1,80 +1,12 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
-from pathlib import Path
 
 from . import __version__
-from .library import empty_library, load_library, save_library
-from .models import (
-    Claim,
-    DecisionPoint,
-    ExtractedPattern,
-    FailureRecovery,
-    FlightTrace,
-    ProcessEvent,
-    Provenance,
-    SessionMeta,
-)
+from .library import empty_library, save_library
 from .pipeline import ingest_transcript, merge_into_library, persist_library, write_trace
 from .render import render_library, render_trace
-
-
-def _prov_list(items: list) -> list[Provenance]:
-    return [Provenance(**p) for p in items]
-
-
-def _trace_from_json(path: str) -> FlightTrace:
-    data = json.loads(Path(path).read_text(encoding="utf-8"))
-    return FlightTrace(
-        schema_version=data.get("schema_version", "0.2.0"),
-        session=SessionMeta(**data.get("session", {})),
-        goal=data.get("goal", ""),
-        observable_process=[
-            ProcessEvent(
-                phase=e["phase"],
-                summary=e["summary"],
-                provenance=_prov_list(e.get("provenance", [])),
-            )
-            for e in data.get("observable_process", [])
-        ],
-        decision_points=[
-            DecisionPoint(
-                decision=d["decision"],
-                evidence=d.get("evidence", ""),
-                plan_before=d.get("plan_before"),
-                plan_after=d.get("plan_after"),
-                provenance=_prov_list(d.get("provenance", [])),
-            )
-            for d in data.get("decision_points", [])
-        ],
-        failures_recoveries=[
-            FailureRecovery(
-                failure=f["failure"],
-                next_action=f["next_action"],
-                recovered=f.get("recovered"),
-                provenance=_prov_list(f.get("provenance", [])),
-            )
-            for f in data.get("failures_recoveries", [])
-        ],
-        anti_patterns_avoided=[
-            Claim(statement=c["statement"], provenance=_prov_list(c.get("provenance", [])))
-            for c in data.get("anti_patterns_avoided", [])
-        ],
-        patterns_extracted=[
-            ExtractedPattern(
-                pattern_id=p.get("pattern_id"),
-                title=p["title"],
-                trigger=p.get("trigger"),
-                evidence_count=p.get("evidence_count", 1),
-                provenance=_prov_list(p.get("provenance", [])),
-            )
-            for p in data.get("patterns_extracted", [])
-        ],
-        confidence=data.get("confidence", {}),
-        provenance_notes=data.get("provenance_notes"),
-    )
 
 
 def _cmd_ingest(args: argparse.Namespace) -> int:
@@ -84,12 +16,14 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
     if args.print or not args.output:
         sys.stdout.write(render_trace(trace))
     if args.json_stdout:
+        import json
+
         sys.stdout.write(json.dumps(trace.to_dict(), indent=2) + "\n")
     return 0
 
 
 def _cmd_render(args: argparse.Namespace) -> int:
-    sys.stdout.write(render_trace(_trace_from_json(args.trace)))
+    sys.stdout.write(render_trace(ingest_transcript(args.trace)))
     return 0
 
 
@@ -103,6 +37,8 @@ def _cmd_library(args: argparse.Namespace) -> int:
 
 
 def _cmd_patterns(args: argparse.Namespace) -> int:
+    from .library import load_library
+
     if args.init:
         save_library(empty_library(include_seed=True), args.init)
         sys.stdout.write(f"Wrote seed library to {args.init}\n")

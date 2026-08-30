@@ -12,11 +12,8 @@ from .parse import load_raw, maybe_json, parse_turns
 def ingest_transcript(path: str | Path) -> FlightTrace:
     raw = load_raw(path)
     as_json = maybe_json(raw)
-    if as_json and "observable_process" in as_json:
-        return FlightTrace(
-            goal=as_json.get("goal", ""),
-            provenance_notes="Loaded existing trace JSON without re-extraction.",
-        )
+    if as_json and ("observable_process" in as_json or "schema_version" in as_json):
+        return FlightTrace.from_dict(as_json)
     turns = parse_turns(raw)
     return build_trace(turns, raw, source_path=str(path))
 
