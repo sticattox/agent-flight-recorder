@@ -5,6 +5,8 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from .roles import Role, normalize_role
+
 
 SPEAKER_RE = re.compile(
     r"^(?P<speaker>User|Human|Andrew|Assistant|Agent|Codex|Grok|ChatGPT|System|Tool|Thought|Thinking|Status)"
@@ -23,6 +25,7 @@ class Turn:
     speaker: str
     text: str
     index: int
+    role: Role = "unknown"
 
     @property
     def locator(self) -> str:
@@ -63,7 +66,8 @@ def parse_turns(text: str) -> list[Turn]:
         nonlocal index, current_lines
         body = "\n".join(current_lines).strip()
         if body:
-            turns.append(Turn(speaker=current_speaker.lower(), text=body, index=index))
+            label = current_speaker.lower()
+            turns.append(Turn(speaker=label, text=body, index=index, role=normalize_role(label)))
             index += 1
         current_lines = []
 
@@ -79,7 +83,7 @@ def parse_turns(text: str) -> list[Turn]:
     flush()
 
     if not turns:
-        turns.append(Turn(speaker="agent", text=text.strip(), index=0))
+        turns.append(Turn(speaker="agent", text=text.strip(), index=0, role="agent"))
     return turns
 
 
@@ -103,7 +107,13 @@ def extract_metadata(text: str) -> dict[str, str]:
             continue
         key = match.group(1).lower()
         value = match.group(2).strip()
-        if key == "agent" and len(value.split()) > 3:
-            break
+        if key == "agent" and (
+            len(value.split()) > 3
+            or value.endswith((".", "!", "?"))
+            or value.lower() in {"ok", "okay", "yes", "no"}
+        ):
+            if meta:
+                break
+            continue
         meta[key] = value
     return meta
