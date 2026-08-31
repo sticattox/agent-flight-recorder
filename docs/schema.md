@@ -23,7 +23,7 @@ PATTERNS EXTRACTED
   reusable operating behaviors with stable IDs when known
 
 CONFIDENCE
-  evidence strength
+  extraction_confidence / corroboration / provenance_coverage
 
 PROVENANCE
   exact transcript excerpts supporting each claim
