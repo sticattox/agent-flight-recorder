@@ -119,9 +119,12 @@ Keep real internal architecture, private chats, proprietary prompts, and lab mac
 
 - **v0.1** transcript → structured trace
 - **v0.2** evidence-linked pattern extraction
+- **v0.2.1** speaker-role normalization, role-aware failure pairing, separated confidence, adversarial negatives
 - **v0.3** multi-session library + tighter dedup *(partial)*
 - **v0.4** compare two agents on the same task *(not shipped)*
 - later: export operating cards for local coding agents
+
+v0.2.1 prefers omission over invention. Human instructions, historical anecdotes, and incidental tokens are not agent behavior.
 
 ## Tests
 
