@@ -3,7 +3,7 @@
 from .models import FlightTrace, PatternRecord, PatternLibrary
 from .pipeline import ingest_transcript, merge_into_library
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __all__ = [
     "FlightTrace",
     "PatternRecord",
