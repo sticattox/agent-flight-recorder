@@ -31,7 +31,9 @@ def render_trace(trace: FlightTrace) -> str:
         lines.append("  (none extracted)")
     for item in trace.failures_recoveries:
         lines.append(f"  failure: {item.failure}")
+        lines.append(f"  source:  {item.failure_source_role}")
         lines.append(f"  next:    {item.next_action}")
+        lines.append(f"  recovery:{item.recovery_status} observed={item.recovery_observed}")
     lines += ["", "ANTI-PATTERNS AVOIDED"]
     if not trace.anti_patterns_avoided:
         lines.append("  (none extracted)")
@@ -43,11 +45,14 @@ def render_trace(trace: FlightTrace) -> str:
     for pattern in trace.patterns_extracted:
         pid = pattern.pattern_id or "unassigned"
         lines.append(f"  {pid} - {pattern.title}")
-    strength = trace.confidence.get("strength", "unknown")
+    conf = trace.confidence
     lines += [
         "",
         "CONFIDENCE",
-        f"  {strength} ({trace.confidence.get('cited_claims', 0)} cited claims)",
+        f"  extraction: {conf.get('extraction_confidence', conf.get('strength', 'unknown'))}",
+        f"  corroboration: {conf.get('corroboration', 1)}",
+        f"  provenance_coverage: {conf.get('provenance_coverage', 0)}",
+        f"  cited_claims: {conf.get('cited_claims', 0)}",
         "",
         "PROVENANCE",
     ]

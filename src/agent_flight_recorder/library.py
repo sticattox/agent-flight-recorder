@@ -70,10 +70,11 @@ def merge_trace(library: PatternLibrary, trace: FlightTrace, session_id: str | N
         if extracted.trigger and extracted.trigger not in record.trigger_conditions:
             record.trigger_conditions.append(extracted.trigger)
         n = len(record.evidence_sessions)
-        if n >= 5:
+        extraction = (trace.confidence or {}).get("extraction_confidence")
+        if n >= 5 and extraction == "high":
             record.confidence = "high"
-        elif n >= 2:
+        elif n >= 2 and extraction in {"medium", "high"}:
             record.confidence = "medium"
         else:
-            record.confidence = record.confidence or "low"
+            record.confidence = "low" if extraction == "low" else (record.confidence or "low")
     return library
