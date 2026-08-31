@@ -4,10 +4,12 @@
   "title": "Agent Flight Record",
   "type": "object",
   "required": ["schema_version", "session", "goal"],
+  "additionalProperties": false,
   "properties": {
     "schema_version": { "type": "string" },
     "session": {
       "type": "object",
+      "additionalProperties": false,
       "properties": {
         "agent": { "type": "string" },
         "model": { "type": "string" },
@@ -17,12 +19,139 @@
       }
     },
     "goal": { "type": "string" },
-    "observable_process": { "type": "array" },
-    "decision_points": { "type": "array" },
-    "failures_recoveries": { "type": "array" },
-    "anti_patterns_avoided": { "type": "array" },
-    "patterns_extracted": { "type": "array" },
-    "confidence": { "type": "object" },
+    "observable_process": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/process_event" }
+    },
+    "decision_points": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/decision_point" }
+    },
+    "failures_recoveries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/failure_recovery" }
+    },
+    "anti_patterns_avoided": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/claim" }
+    },
+    "patterns_extracted": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/extracted_pattern" }
+    },
+    "confidence": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "extraction_confidence": { "enum": ["low", "medium", "high"] },
+        "corroboration": { "type": "integer", "minimum": 0 },
+        "provenance_coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "strength": { "type": "string" },
+        "cited_claims": { "type": "integer", "minimum": 0 },
+        "notes": { "type": "string" }
+      }
+    },
     "provenance_notes": { "type": "string" }
+  },
+  "$defs": {
+    "provenance": {
+      "type": "object",
+      "required": ["excerpt", "speaker"],
+      "additionalProperties": false,
+      "properties": {
+        "excerpt": { "type": "string", "minLength": 1 },
+        "speaker": { "type": "string" },
+        "role": {
+          "enum": ["human", "agent", "tool", "system", "reasoning-visible", "unknown"]
+        },
+        "locator": { "type": "string" }
+      }
+    },
+    "process_event": {
+      "type": "object",
+      "required": ["phase", "summary"],
+      "additionalProperties": false,
+      "properties": {
+        "phase": {
+          "enum": [
+            "inspect",
+            "hypothesize",
+            "execute",
+            "observe",
+            "diagnose",
+            "revise",
+            "verify",
+            "freeze",
+            "escalate"
+          ]
+        },
+        "summary": { "type": "string" },
+        "provenance": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/provenance" }
+        }
+      }
+    },
+    "decision_point": {
+      "type": "object",
+      "required": ["decision", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "decision": { "type": "string" },
+        "evidence": { "type": "string" },
+        "plan_before": { "type": "string" },
+        "plan_after": { "type": "string" },
+        "provenance": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/provenance" }
+        }
+      }
+    },
+    "failure_recovery": {
+      "type": "object",
+      "required": ["failure", "next_action"],
+      "additionalProperties": false,
+      "properties": {
+        "failure": { "type": "string" },
+        "next_action": { "type": "string" },
+        "recovered": { "type": ["boolean", "null"] },
+        "failure_source_role": { "type": "string" },
+        "recovery_action": { "type": ["string", "null"] },
+        "recovery_action_role": { "type": ["string", "null"] },
+        "recovery_observed": { "type": "boolean" },
+        "recovery_status": { "enum": ["observed", "unresolved", "none"] },
+        "provenance": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/provenance" }
+        }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "required": ["statement"],
+      "additionalProperties": false,
+      "properties": {
+        "statement": { "type": "string" },
+        "provenance": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/provenance" }
+        }
+      }
+    },
+    "extracted_pattern": {
+      "type": "object",
+      "required": ["title"],
+      "additionalProperties": false,
+      "properties": {
+        "pattern_id": { "type": "string" },
+        "title": { "type": "string" },
+        "trigger": { "type": "string" },
+        "evidence_count": { "type": "integer", "minimum": 0 },
+        "provenance": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/provenance" }
+        }
+      }
+    }
   }
 }
