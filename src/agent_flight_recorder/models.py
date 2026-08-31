@@ -29,6 +29,7 @@ def _clean(value: Any) -> Any:
 class Provenance:
     excerpt: str
     speaker: str = "agent"
+    role: str = "unknown"
     locator: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
@@ -76,6 +77,11 @@ class FailureRecovery:
     failure: str
     next_action: str
     recovered: bool | None = None
+    failure_source_role: str = "unknown"
+    recovery_action: str | None = None
+    recovery_action_role: str | None = None
+    recovery_observed: bool = False
+    recovery_status: str = "unresolved"
     provenance: list[Provenance] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
@@ -83,6 +89,11 @@ class FailureRecovery:
             "failure": self.failure,
             "next_action": self.next_action,
             "recovered": self.recovered,
+            "failure_source_role": self.failure_source_role,
+            "recovery_action": self.recovery_action,
+            "recovery_action_role": self.recovery_action_role,
+            "recovery_observed": self.recovery_observed,
+            "recovery_status": self.recovery_status,
             "provenance": [p.to_dict() for p in self.provenance],
         }
         return {k: v for k, v in data.items() if v is not None}
@@ -132,7 +143,7 @@ class SessionMeta:
 
 @dataclass
 class FlightTrace:
-    schema_version: str = "0.2.0"
+    schema_version: str = "0.2.1"
     session: SessionMeta = field(default_factory=SessionMeta)
     goal: str = ""
     observable_process: list[ProcessEvent] = field(default_factory=list)
@@ -182,7 +193,7 @@ class PatternRecord:
 
 @dataclass
 class PatternLibrary:
-    schema_version: str = "0.2.0"
+    schema_version: str = "0.2.1"
     patterns: list[PatternRecord] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
