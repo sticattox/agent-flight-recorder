@@ -32,6 +32,12 @@ SEED_PATTERNS: list[PatternRecord] = [
             "Resume only after the resume gate passes",
         ],
         confidence="medium",
+        match_cues=[
+            "paused exactly",
+            "assumption may be wrong",
+            "foundational assumption",
+            "reduce mutation",
+        ],
     ),
     PatternRecord(
         pattern_id="AFR-P002",
@@ -52,6 +58,7 @@ SEED_PATTERNS: list[PatternRecord] = [
             "Compare tabulated results",
         ],
         confidence="medium",
+        match_cues=["same tests", "same questions", "candidate roots", "symmetrically"],
     ),
     PatternRecord(
         pattern_id="AFR-P003",
@@ -71,6 +78,7 @@ SEED_PATTERNS: list[PatternRecord] = [
             "Escalate if a field cannot be known from this environment",
         ],
         confidence="medium",
+        match_cues=["resume gate", "remain read-only", "stay frozen", "read-only until"],
     ),
     PatternRecord(
         pattern_id="AFR-P004",
@@ -88,6 +96,7 @@ SEED_PATTERNS: list[PatternRecord] = [
             "Compare task_tree to trusted_baseline with those excludes",
         ],
         confidence="medium",
+        match_cues=["trusted baseline", "hash-compare", "project policy", "policy excludes"],
     ),
     PatternRecord(
         pattern_id="AFR-P005",
@@ -107,6 +116,7 @@ SEED_PATTERNS: list[PatternRecord] = [
             "Prove transfer integrity before new edits",
         ],
         confidence="medium",
+        match_cues=["specimen", "preserve partial", "leave the accidental", "preservation artifact"],
     ),
     PatternRecord(
         pattern_id="AFR-P006",
@@ -125,6 +135,7 @@ SEED_PATTERNS: list[PatternRecord] = [
             "Refuse repo-wide clean/reset",
         ],
         confidence="medium",
+        match_cues=["will not clean", "will not reset", "umbrella", "not the task"],
     ),
 ]
 
