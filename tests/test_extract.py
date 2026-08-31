@@ -48,13 +48,31 @@ def test_confidence_high_is_reachable_when_goal_is_known():
         ProcessEvent(
             phase="inspect",
             summary=f"step {i}",
-            provenance=[Provenance(excerpt=f"excerpt {i}")],
+            provenance=[Provenance(excerpt=f"excerpt {i}", role="agent")],
         )
-        for i in range(8)
+        for i in range(3)
     ]
-    extra = [Claim(statement="refused reset", provenance=[Provenance(excerpt="no reset")])]
+    extra = [Claim(statement="refused reset", provenance=[Provenance(excerpt="no reset", role="agent")])]
     trace = FlightTrace(goal="Add --json", observable_process=cited, anti_patterns_avoided=extra)
-    assert confidence_for(trace)["strength"] == "high"
+    result = confidence_for(trace)
+    assert result["extraction_confidence"] == "high"
+    assert result["corroboration"] == 1
+
+
+def test_volume_alone_is_not_high_confidence():
+    from agent_flight_recorder.extract import confidence_for
+    from agent_flight_recorder.models import FlightTrace, ProcessEvent, Provenance
+
+    cited = [
+        ProcessEvent(
+            phase="inspect",
+            summary=f"step {i}",
+            provenance=[Provenance(excerpt=f"excerpt {i}", role="unknown")],
+        )
+        for i in range(20)
+    ]
+    trace = FlightTrace(goal="Add --json", observable_process=cited)
+    assert confidence_for(trace)["extraction_confidence"] != "high"
 
 
 def test_ingest_existing_trace_json_keeps_process(tmp_path):
